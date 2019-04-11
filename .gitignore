@@ -23,3 +23,11 @@
 hs_err_pid*
 server/.idea/
 server/spring-boot-jwt-auth.iml
+
+# idea
+.idea
+.idea/*
+
+# ipr iws
+*.ipr
+*.iws
