@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import {FormBuilder, FormGroup, Validators} from "@angular/forms";
 import {Router} from "@angular/router";
 import {ApiService} from "../core/api.service";
+import { AuthGuardService } from '../services/auth-guard.service';
 
 @Component({
   selector: 'app-login',
@@ -12,7 +13,8 @@ export class LoginComponent implements OnInit {
 
   loginForm: FormGroup;
   invalidLogin: boolean = false;
-  constructor(private formBuilder: FormBuilder, private router: Router, private apiService: ApiService) { }
+  constructor(private formBuilder: FormBuilder, private router: Router,
+    private apiService: ApiService, private authGuardService: AuthGuardService) { }
 
   onSubmit() {
     if (this.loginForm.invalid) {
@@ -25,8 +27,8 @@ export class LoginComponent implements OnInit {
     this.apiService.login(loginPayload).subscribe(data => {
       debugger;
       if(data.status === 200) {
-        window.localStorage.setItem('token', data.result.token);
-        this.router.navigate(['list-user']);
+        this.authGuardService.login(data.result.token);
+        this.router.navigate(['home']);
       }else {
         this.invalidLogin = true;
         alert(data.message);
@@ -35,7 +37,10 @@ export class LoginComponent implements OnInit {
   }
 
   ngOnInit() {
-    window.localStorage.removeItem('token');
+    if(this.authGuardService.hasLoggedIn()) {
+      // this.router.navigate(['home']);
+      this.authGuardService.logout();
+    }
     this.loginForm = this.formBuilder.group({
       username: ['', Validators.compose([Validators.required])],
       password: ['', Validators.required]
